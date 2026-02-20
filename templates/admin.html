@@ -1,0 +1,1203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Administration - Les Délices de Marie{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a href="#" class="nav-link active" data-page="management">
+        <i class="fas fa-cog"></i> Gestion
+    </a>
+</li>
+<li class="nav-item">
+    <a href="/admin/" class="nav-link" target="_blank">
+        <i class="fas fa-shield-alt"></i> Admin Django
+    </a>
+</li>
+
+{% endblock %}
+
+{% block content %}
+<!-- Page de gestion uniquement -->
+<section id="management" class="page active">
+    <div class="container">
+        <h2 class="section-title">
+            <i class="fas fa-cog"></i> Gestion de la pâtisserie
+        </h2>
+        
+        {% if user.is_authenticated %}
+        <div class="admin-welcome">
+            <p>Bienvenue, <strong>{{ user.username }}</strong></p>
+        </div>
+        {% endif %}
+        
+        <div class="management-tabs">
+            <button class="tab-btn active" data-tab="products-management">
+                <i class="fas fa-birthday-cake"></i> Produits
+            </button>
+            <button class="tab-btn" data-tab="stock-management">
+                <i class="fas fa-boxes"></i> Stocks
+            </button>
+            <button class="tab-btn" data-tab="orders-management">
+                <i class="fas fa-shopping-bag"></i> Commandes
+            </button>
+            <button class="tab-btn" data-tab="messages-management">
+                <i class="fas fa-envelope"></i> Messages
+            </button>
+            <button class="tab-btn" data-tab="users-management">
+                <i class="fas fa-users"></i> Utilisateurs
+            </button>
+        </div>
+        
+        <div class="tab-content">
+            <!-- Gestion des produits -->
+            <div id="products-management" class="tab-panel active">
+                <div class="management-header">
+                    <h3>Gestion des produits</h3>
+                    <button class="btn btn-primary" onclick="openProductModal()">
+                        <i class="fas fa-plus"></i> Ajouter un produit
+                    </button>
+                </div>
+                <div class="products-management-grid" id="productsManagementGrid">
+                    <!-- Produits pour la gestion -->
+                </div>
+            </div>
+            
+            <!-- Gestion des stocks -->
+            <div id="stock-management" class="tab-panel">
+                <h3>Gestion des stocks</h3>
+                <div class="stock-grid" id="stockGrid">
+                    <!-- Stocks -->
+                </div>
+            </div>
+            
+            <!-- Gestion des commandes -->
+            <div id="orders-management" class="tab-panel">
+                <h3>Gestion des commandes</h3>
+                <div class="filters-bar">
+                    <select id="orderStatusFilter" onchange="filterOrdersByStatus(this.value)">
+                        <option value="">Tous les statuts</option>
+                        <option value="pending">En préparation</option>
+                        <option value="paid">Payées</option>
+                        <option value="ready">Prêtes</option>
+                        <option value="delivered">Livrées</option>
+                        <option value="cancelled">Annulées</option>
+                    </select>
+                </div>
+                <div class="orders-management-grid" id="ordersManagementGrid">
+                    <!-- Commandes pour la gestion -->
+                </div>
+            </div>
+            
+            <!-- Gestion des messages -->
+            <div id="messages-management" class="tab-panel">
+                <h3>Messages de contact</h3>
+                <div class="filters-bar">
+                    <select id="messageStatusFilter" onchange="filterMessagesByStatus(this.value)">
+                        <option value="">Tous les statuts</option>
+                        <option value="new">Nouveaux</option>
+                        <option value="read">Lus</option>
+                        <option value="replied">Répondus</option>
+                        <option value="closed">Fermés</option>
+                    </select>
+                </div>
+                <div class="messages-grid" id="messagesGrid">
+                    <!-- Messages de contact -->
+                </div>
+            </div>
+            
+            <!-- Gestion des utilisateurs -->
+            <div id="users-management" class="tab-panel">
+                <div class="management-header">
+                    <h3>Gestion des utilisateurs</h3>
+                    <div class="users-stats">
+                        <span class="stat-badge" id="totalUsers">0 utilisateurs</span>
+                        <span class="stat-badge" id="activeUsers">0 actifs</span>
+                        <span class="stat-badge" id="adminUsers">0 admins</span>
+                    </div>
+                </div>
+                
+                <!-- Filtres avancés -->
+                <div class="filters-section">
+                    <div class="filters-bar">
+                        <select id="userRoleFilter" onchange="filterUsersByRole(this.value)">
+                            <option value="">Tous les rôles</option>
+                            <option value="admin">Administrateurs</option>
+                            <option value="client">Clients</option>
+                        </select>
+                        <select id="userStatusFilter" onchange="filterUsersByStatus(this.value)">
+                            <option value="">Tous les statuts</option>
+                            <option value="active">Actifs</option>
+                            <option value="inactive">Inactifs</option>
+                        </select>
+                        <select id="userSortFilter" onchange="sortUsers(this.value)">
+                            <option value="date_joined">Date d'inscription</option>
+                            <option value="username">Nom d'utilisateur</option>
+                            <option value="last_login">Dernière connexion</option>
+                        </select>
+                        <div class="search-box">
+                            <input type="text" id="userSearchInput" placeholder="Rechercher un utilisateur..." onkeyup="searchUsers(this.value)">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <button class="btn btn-outline" onclick="resetAllFilters()">
+                            <i class="fas fa-redo"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Grille des utilisateurs avec pagination -->
+                <div class="users-grid" id="usersGrid">
+                    <!-- Utilisateurs seront chargés ici -->
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination" id="usersPagination">
+                    <!-- Pagination sera générée dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal pour ajouter/modifier un produit -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Ajouter un produit</h3>
+            <button class="modal-close" onclick="closeProductModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="productForm" class="modal-form">
+            <div class="form-group">
+                <label for="productName">Nom du produit</label>
+                <input type="text" id="productName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="productDescription">Description</label>
+                <textarea id="productDescription" name="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">Prix (cfa)</label>
+                <input type="number" id="productPrice" name="price" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="productStock">Stock disponible</label>
+                <input type="number" id="productStock" name="stock" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="productImage">Image du produit</label>
+                <div class="image-upload-container">
+                    <div class="image-preview" id="imagePreview">
+                        <i class="fas fa-image"></i>
+                        <span>Aperçu de l'image</span>
+                    </div>
+                    <div class="image-upload-controls">
+                        <input type="file" id="productImageFile" name="image_file" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('productImageFile').click()">
+                            <i class="fas fa-upload"></i> Choisir une image
+                        </button>
+                        <input type="url" id="productImage" name="image" placeholder="ou entrer une URL..." style="display: none;">
+                        <button type="button" class="btn btn-outline" id="toggleUrlInput" onclick="toggleImageInput()">
+                            <i class="fas fa-link"></i> URL
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="productCategory">Catégorie</label>
+                <select id="productCategory" name="category" required>
+                    <option value="">Sélectionnez une catégorie</option>
+                    <option value="gateaux">Gâteaux</option>
+                    <option value="patisseries">Pâtisseries</option>
+                    <option value="viennoiseries">Viennoiseries</option>
+                    <option value="macarons">Macarons</option>
+                    <option value="chocolats">Chocolats</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal pour voir les commandes d'un utilisateur -->
+<div id="userOrdersModal" class="modal">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3 id="userOrdersTitle">Commandes de l'utilisateur</h3>
+            <button class="modal-close" onclick="closeUserOrdersModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="userOrdersList">
+                <!-- Commandes seront chargées ici -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour confirmer l'activation/désactivation -->
+<div id="toggleUserModal" class="modal">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3 id="toggleUserTitle">Confirmer l'action</h3>
+        </div>
+        <div class="modal-body">
+            <p id="toggleUserMessage">Êtes-vous sûr de vouloir modifier le statut de cet utilisateur ?</p>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeToggleUserModal()">Annuler</button>
+            <button type="button" class="btn btn-warning" id="confirmToggleUserBtn">Confirmer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour confirmer la suppression -->
+<div id="deleteUserModal" class="modal">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Supprimer l'utilisateur</h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Attention :</strong> Cette action est irréversible et supprimera également toutes les commandes et messages de cet utilisateur.
+            </div>
+            <p id="deleteUserMessage">Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteUserModal()">Annuler</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteUserBtn">Supprimer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour voir les détails d'un utilisateur -->
+<div id="userDetailsModal" class="modal">
+    <div class="modal-content modal-medium">
+        <div class="modal-header">
+            <h3 id="userDetailsTitle">Détails de l'utilisateur</h3>
+            <button class="modal-close" onclick="closeUserDetailsModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="userDetailsContent">
+                <!-- Détails seront chargés ici -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Fonction pour filtrer les commandes par statut
+async function filterOrdersByStatus(status) {
+    const container = document.getElementById('ordersManagementGrid');
+    if (!container) return;
+    
+    try {
+        container.innerHTML = '<div class="loading">Chargement...</div>';
+        
+        const params = status ? { status: status } : {};
+        const orders = await OrdersAPI.getAll(params);
+        
+        container.innerHTML = '';
+        
+        if (orders.length === 0) {
+            container.innerHTML = '<div class="no-data">Aucune commande trouvée</div>';
+            return;
+        }
+        
+        orders.forEach(order => {
+            const orderCard = createOrderManagementCard(order);
+            container.appendChild(orderCard);
+        });
+    } catch (error) {
+        console.error('Erreur:', error);
+        container.innerHTML = '<div class="error">Erreur de chargement</div>';
+    }
+}
+
+// Fonction pour charger et afficher les messages
+async function loadContactMessages() {
+    const container = document.getElementById('messagesGrid');
+    if (!container) return;
+    
+    try {
+        container.innerHTML = '<div class="loading">Chargement...</div>';
+        
+        let messages = await ContactAPI.getAll();
+        // console.log('management.loadContactMessages - raw messages:', messages);
+        if (!messages) messages = [];
+        if (!Array.isArray(messages) && messages.results) messages = messages.results;
+
+        container.innerHTML = '';
+
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="no-data">Aucun message</div>';
+            return;
+        }
+
+        messages.forEach(message => {
+            const messageCard = createMessageCard(message);
+            container.appendChild(messageCard);
+        });
+    } catch (error) {
+        console.error('Erreur:', error);
+        container.innerHTML = '<div class="error">Erreur de chargement</div>';
+    }
+}
+
+// Fonction pour créer une carte de message
+function createMessageCard(message) {
+    const card = document.createElement('div');
+    card.className = `message-card status-${message.status}`;
+    
+    const statusLabels = {
+        'new': 'Nouveau',
+        'read': 'Lu',
+        'replied': 'Répondu',
+        'closed': 'Fermé'
+    };
+    
+    card.innerHTML = `
+        <div class="message-header">
+            <div class="message-info">
+                <h4>${message.name}</h4>
+                <p><i class="fas fa-envelope"></i> ${message.email}</p>
+                ${message.phone ? `<p><i class="fas fa-phone"></i> ${message.phone}</p>` : ''}
+            </div>
+            <span class="message-status badge badge-${message.status}">${statusLabels[message.status] || message.status}</span>
+        </div>
+        <div class="message-body">
+            <p class="message-subject"><strong>Sujet:</strong> ${message.subject_label}</p>
+            <p class="message-text">${message.message}</p>
+            <p class="message-date"><i class="fas fa-calendar"></i> ${formatDate(message.created_at)}</p>
+        </div>
+        <div class="message-actions">
+            ${message.status === 'new' ? `
+                <button class="btn btn-primary" onclick="markMessageAsRead(${message.id})">
+                    <i class="fas fa-check"></i> Marquer comme lu
+                </button>
+            ` : ''}
+            ${message.status !== 'replied' && message.status !== 'closed' ? `
+                <button class="btn btn-success" onclick="markMessageAsReplied(${message.id})">
+                    <i class="fas fa-reply"></i> Marquer comme répondu
+                </button>
+            ` : ''}
+        </div>
+    `;
+    
+    return card;
+}
+
+// Marquer un message comme lu
+async function markMessageAsRead(messageId) {
+    try {
+        await ContactAPI.markAsRead(messageId);
+        showNotification('Message marqué comme lu', 'success');
+        await loadContactMessages();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('Erreur: ' + error.message, 'error');
+    }
+}
+
+// Marquer un message comme répondu
+async function markMessageAsReplied(messageId) {
+    try {
+        await ContactAPI.markAsReplied(messageId);
+        showNotification('Message marqué comme répondu', 'success');
+        await loadContactMessages();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('Erreur: ' + error.message, 'error');
+    }
+}
+
+// Filtrer les messages par statut
+async function filterMessagesByStatus(status) {
+    const container = document.getElementById('messagesGrid');
+    if (!container) return;
+    
+    try {
+        container.innerHTML = '<div class="loading">Chargement...</div>';
+        
+        const params = status ? { status: status } : {};
+        let messages = await ContactAPI.getAll(params);
+        // console.log('management.filterMessagesByStatus - raw messages:', messages);
+        if (!messages) messages = [];
+        if (!Array.isArray(messages) && messages.results) messages = messages.results;
+
+        container.innerHTML = '';
+
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="no-data">Aucun message trouvé</div>';
+            return;
+        }
+
+        messages.forEach(message => {
+            const messageCard = createMessageCard(message);
+            container.appendChild(messageCard);
+        });
+    } catch (error) {
+        console.error('Erreur:', error);
+        container.innerHTML = '<div class="error">Erreur de chargement</div>';
+    }
+}
+
+// Charger les messages et initialiser la gestion au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter un listener pour l'onglet messages
+    const messagesTab = document.querySelector('[data-tab="messages-management"]');
+    if (messagesTab) {
+        messagesTab.addEventListener('click', function() {
+            setTimeout(loadContactMessages, 100);
+        });
+    }
+    
+    // Ajouter un listener pour l'onglet utilisateurs
+    const usersTab = document.querySelector('[data-tab="users-management"]');
+    if (usersTab) {
+        usersTab.addEventListener('click', function() {
+            setTimeout(loadUsers, 100);
+        });
+    }
+    
+    // Initialiser la gestion (onglets + chargement) si la page management est affichée
+    if (typeof loadManagement === 'function') {
+        try { loadManagement(); } catch (e) { console.error('loadManagement error', e); }
+    }
+});
+
+// ============================================
+// Gestion des utilisateurs
+// ============================================
+
+async function loadUsers() {
+    const container = document.getElementById('usersGrid');
+    if (!container) return;
+    
+    try {
+        container.innerHTML = '<div class="loading">Chargement...</div>';
+        
+        // Utiliser l'endpoint Django admin pour récupérer les utilisateurs
+        const response = await fetch('/api/users/list/');
+        if (!response.ok) {
+            throw new Error('Erreur de chargement');
+        }
+        
+        const data = await response.json();
+        const users = data.users || [];
+        
+        container.innerHTML = '';
+        
+        if (users.length === 0) {
+            container.innerHTML = '<div class="no-data">Aucun utilisateur trouvé</div>';
+            return;
+        }
+        
+        users.forEach(user => {
+            const userCard = createUserCard(user);
+            container.appendChild(userCard);
+        });
+    } catch (error) {
+        console.error('Erreur:', error);
+        container.innerHTML = '<div class="error">Erreur de chargement des utilisateurs</div>';
+    }
+}
+
+function createUserCard(user) {
+    const card = document.createElement('div');
+    card.className = `user-card ${!user.is_active ? 'inactive' : ''}`;
+    
+    const roleLabel = user.is_superuser ? 'Administrateur' : 'Client';
+    const roleClass = user.is_superuser ? 'badge-admin' : 'badge-client';
+    const statusLabel = user.is_active ? 'Actif' : 'Inactif';
+    const statusClass = user.is_active ? 'badge-success' : 'badge-warning';
+    
+    card.innerHTML = `
+        <div class="user-header">
+            <div class="user-info" onclick="showUserDetails(${user.id})" style="cursor: pointer;">
+                <h4><i class="fas fa-user"></i> ${user.username}</h4>
+                <p><i class="fas fa-envelope"></i> ${user.email || 'Non renseigné'}</p>
+            </div>
+            <div class="user-badges">
+                <span class="badge ${roleClass}">${roleLabel}</span>
+                <span class="badge ${statusClass}">${statusLabel}</span>
+            </div>
+        </div>
+        <div class="user-body">
+            <p><i class="fas fa-calendar"></i> Inscrit le: ${formatDate(user.date_joined)}</p>
+            <p><i class="fas fa-clock"></i> Dernière connexion: ${user.last_login ? formatDate(user.last_login) : 'Jamais'}</p>
+            ${!user.is_superuser ? `<p><i class="fas fa-shopping-bag"></i> Commandes: ${user.orders_count || 0}</p>` : ''}
+        </div>
+        ${!user.is_superuser ? `
+        <div class="user-actions">
+            <button class="btn btn-sm btn-info" onclick="showUserOrdersModal(${user.id}, '${user.username}')">
+                <i class="fas fa-list"></i> Commandes
+            </button>
+            <button class="btn btn-sm ${user.is_active ? 'btn-warning' : 'btn-success'}" onclick="showToggleUserModal(${user.id}, '${user.username}', ${user.is_active})">
+                <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i> ${user.is_active ? 'Désactiver' : 'Activer'}
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="showDeleteUserModal(${user.id}, '${user.username}')">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>
+        </div>
+        ` : '<div class="user-actions"><span class="text-muted">Administrateur protégé</span></div>'}
+    `;
+    
+    return card;
+}
+
+async function toggleUserActive(userId) {
+    if (!confirm('Voulez-vous vraiment modifier le statut de cet utilisateur ?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/users/${userId}/toggle-active/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            await loadUsers();
+        } else {
+            showNotification(data.error || 'Erreur lors de la modification', 'error');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('Erreur de connexion', 'error');
+    }
+}
+
+// ============================================
+// Fonctions utilitaires
+// ============================================
+
+function getCsrfToken() {
+    return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Non défini';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// ============================================
+// Fonctions pour les modales utilisateurs
+// ============================================
+
+// Variables globales pour la gestion
+let allUsers = [];
+let filteredUsers = [];
+let currentPage = 1;
+const usersPerPage = 12;
+
+// Fonction pour afficher les détails d'un utilisateur
+function showUserDetails(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    const modal = document.getElementById('userDetailsModal');
+    const content = document.getElementById('userDetailsContent');
+    
+    content.innerHTML = `
+        <div class="user-details-grid">
+            <div class="detail-item">
+                <label>Nom d'utilisateur:</label>
+                <span>${user.username}</span>
+            </div>
+            <div class="detail-item">
+                <label>Email:</label>
+                <span>${user.email || 'Non renseigné'}</span>
+            </div>
+            <div class="detail-item">
+                <label>Rôle:</label>
+                <span class="badge ${user.is_superuser ? 'badge-admin' : 'badge-client'}">
+                    ${user.is_superuser ? 'Administrateur' : 'Client'}
+                </span>
+            </div>
+            <div class="detail-item">
+                <label>Statut:</label>
+                <span class="badge ${user.is_active ? 'badge-success' : 'badge-warning'}">
+                    ${user.is_active ? 'Actif' : 'Inactif'}
+                </span>
+            </div>
+            <div class="detail-item">
+                <label>Date d'inscription:</label>
+                <span>${formatDate(user.date_joined)}</span>
+            </div>
+            <div class="detail-item">
+                <label>Dernière connexion:</label>
+                <span>${user.last_login ? formatDate(user.last_login) : 'Jamais'}</span>
+            </div>
+            ${!user.is_superuser ? `
+            <div class="detail-item">
+                <label>Nombre de commandes:</label>
+                <span>${user.orders_count || 0}</span>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+}
+
+// Fonction pour afficher la modale des commandes
+function showUserOrdersModal(userId, username) {
+    const modal = document.getElementById('userOrdersModal');
+    const title = document.getElementById('userOrdersTitle');
+    const list = document.getElementById('userOrdersList');
+    
+    title.textContent = `Commandes de ${username}`;
+    list.innerHTML = '<div class="loading">Chargement des commandes...</div>';
+    
+    modal.style.display = 'flex';
+    
+    // Charger les commandes
+    viewUserOrders(userId);
+}
+
+// Fonction pour afficher la modale de toggle
+function showToggleUserModal(userId, username, isActive) {
+    const modal = document.getElementById('toggleUserModal');
+    const title = document.getElementById('toggleUserTitle');
+    const message = document.getElementById('toggleUserMessage');
+    const confirmBtn = document.getElementById('confirmToggleUserBtn');
+    
+    const action = isActive ? 'désactiver' : 'activer';
+    title.textContent = `${action.charAt(0).toUpperCase() + action.slice(1)} l'utilisateur`;
+    message.textContent = `Êtes-vous sûr de vouloir ${action} l'utilisateur "${username}" ?`;
+    
+    confirmBtn.onclick = async function() {
+        await toggleUserActive(userId);
+        closeToggleUserModal();
+    };
+    
+    modal.style.display = 'flex';
+}
+
+// Fonction pour afficher la modale de suppression
+function showDeleteUserModal(userId, username) {
+    const modal = document.getElementById('deleteUserModal');
+    const message = document.getElementById('deleteUserMessage');
+    const confirmBtn = document.getElementById('confirmDeleteUserBtn');
+    
+    message.textContent = `Êtes-vous sûr de vouloir supprimer l'utilisateur "${username}" ?`;
+    
+    confirmBtn.onclick = async function() {
+        await deleteUser(userId, username);
+        closeDeleteUserModal();
+    };
+    
+    modal.style.display = 'flex';
+}
+
+// Fonctions pour fermer les modales
+function closeUserDetailsModal() {
+    document.getElementById('userDetailsModal').style.display = 'none';
+}
+
+function closeUserOrdersModal() {
+    document.getElementById('userOrdersModal').style.display = 'none';
+}
+
+function closeToggleUserModal() {
+    document.getElementById('toggleUserModal').style.display = 'none';
+}
+
+function closeDeleteUserModal() {
+    document.getElementById('deleteUserModal').style.display = 'none';
+}
+
+// ============================================
+// Fonctions de pagination et filtrage
+// ============================================
+
+async function loadUsers() {
+    const container = document.getElementById('usersGrid');
+    if (!container) return;
+    
+    try {
+        container.innerHTML = '<div class="loading">Chargement...</div>';
+        
+        // Utiliser l'endpoint Django admin pour récupérer les utilisateurs
+        // console.log('📡 Appel de l\'endpoint /api/users/list/');
+        const response = await fetch('/api/users/list/');
+        // console.log('📡 Response status:', response.status);
+        // console.log('📡 Response ok:', response.ok);
+        
+        if (!response.ok) {
+            throw new Error('Erreur de chargement');
+        }
+        
+        const data = await response.json();
+        // console.log('📊 Données reçues:', data);
+        // console.log('📊 Utilisateurs bruts:', data.users);
+        
+        allUsers = data.users || [];
+        // console.log('📊 allUsers après chargement:', allUsers.length);
+        
+        filteredUsers = [...allUsers];
+        // console.log('📊 filteredUsers initial:', filteredUsers.length);
+        
+        // Mettre à jour les statistiques
+        updateUserStats();
+        
+        // Afficher la première page
+        currentPage = 1;
+        displayUsers();
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement:', error);
+        container.innerHTML = '<div class="error">Erreur de chargement des utilisateurs</div>';
+    }
+}
+
+function updateUserStats() {
+    const totalUsers = allUsers.length;
+    const activeUsers = allUsers.filter(u => u.is_active).length;
+    const adminUsers = allUsers.filter(u => u.is_superuser).length;
+    
+    document.getElementById('totalUsers').textContent = `${totalUsers} utilisateurs`;
+    document.getElementById('activeUsers').textContent = `${activeUsers} actifs`;
+    document.getElementById('adminUsers').textContent = `${adminUsers} admins`;
+}
+
+function displayUsers() {
+    const container = document.getElementById('usersGrid');
+    const startIndex = (currentPage - 1) * usersPerPage;
+    const endIndex = startIndex + usersPerPage;
+    const usersToShow = filteredUsers.slice(startIndex, endIndex);
+    
+    // console.log('📋 displayUsers appelé:');
+    // console.log('  - currentPage:', currentPage);
+    // console.log('  - usersPerPage:', usersPerPage);
+    // console.log('  - startIndex:', startIndex);
+    // console.log('  - endIndex:', endIndex);
+    // console.log('  - filteredUsers.length:', filteredUsers.length);
+    // console.log('  - usersToShow.length:', usersToShow.length);
+    
+    container.innerHTML = '';
+    
+    if (usersToShow.length === 0) {
+        // console.log('📋 Aucun utilisateur à afficher');
+        container.innerHTML = '<div class="no-data">Aucun utilisateur trouvé</div>';
+        return;
+    }
+    
+    usersToShow.forEach(user => {
+        // console.log('📋 Création carte pour:', user.username);
+        const userCard = createUserCard(user);
+        container.appendChild(userCard);
+    });
+    
+    // Mettre à jour la pagination
+    updatePagination();
+}
+
+function updatePagination() {
+    const pagination = document.getElementById('usersPagination');
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+    
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '';
+    
+    // Bouton précédent
+    if (currentPage > 1) {
+        paginationHTML += `<button class="btn btn-secondary" onclick="goToPage(${currentPage - 1})">Précédent</button>`;
+    }
+    
+    // Numéros de page
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const isActive = i === currentPage ? 'btn-primary' : 'btn-secondary';
+        paginationHTML += `<button class="btn ${isActive}" onclick="goToPage(${i})">${i}</button>`;
+    }
+    
+    // Bouton suivant
+    if (currentPage < totalPages) {
+        paginationHTML += `<button class="btn btn-secondary" onclick="goToPage(${currentPage + 1})">Suivant</button>`;
+    }
+    
+    pagination.innerHTML = paginationHTML;
+}
+
+function goToPage(page) {
+    currentPage = page;
+    displayUsers();
+}
+
+function filterUsersByRole(role) {
+    // console.log('🔄 Filtrage par rôle:', role);
+    
+    // Partir de toutes les données
+    let result = [...allUsers];
+    
+    // Appliquer le filtre de rôle
+    if (role && role !== '') {
+        result = result.filter(user => {
+            if (role === 'admin') return user.is_superuser;
+            if (role === 'client') return !user.is_superuser;
+            return true;
+        });
+    }
+    
+    // Appliquer le filtre de statut s'il est sélectionné
+    const statusFilter = document.getElementById('userStatusFilter').value;
+    if (statusFilter && statusFilter !== '') {
+        result = result.filter(user => {
+            if (statusFilter === 'active') return user.is_active;
+            if (statusFilter === 'inactive') return !user.is_active;
+            return true;
+        });
+    }
+    
+    // Appliquer la recherche s'il y a du texte
+    const searchQuery = document.getElementById('userSearchInput').value;
+    if (searchQuery && searchQuery.trim() !== '') {
+        const searchLower = searchQuery.toLowerCase().trim();
+        result = result.filter(user => 
+            user.username.toLowerCase().includes(searchLower) ||
+            (user.email && user.email.toLowerCase().includes(searchLower))
+        );
+    }
+    
+    // console.log('📊 Résultat après filtre rôle:', result.length, 'utilisateurs');
+    filteredUsers = result;
+    currentPage = 1;
+    displayUsers();
+}
+
+function filterUsersByStatus(status) {
+    // console.log('🔄 Filtrage par statut:', status);
+    
+    // Partir de toutes les données
+    let result = [...allUsers];
+    
+    // Appliquer le filtre de statut
+    if (status && status !== '') {
+        result = result.filter(user => {
+            if (status === 'active') return user.is_active;
+            if (status === 'inactive') return !user.is_active;
+            return true;
+        });
+    }
+    
+    // Appliquer le filtre de rôle s'il est sélectionné
+    const roleFilter = document.getElementById('userRoleFilter').value;
+    if (roleFilter && roleFilter !== '') {
+        result = result.filter(user => {
+            if (roleFilter === 'admin') return user.is_superuser;
+            if (roleFilter === 'client') return !user.is_superuser;
+            return true;
+        });
+    }
+    
+    // Appliquer la recherche s'il y a du texte
+    const searchQuery = document.getElementById('userSearchInput').value;
+    if (searchQuery && searchQuery.trim() !== '') {
+        const searchLower = searchQuery.toLowerCase().trim();
+        result = result.filter(user => 
+            user.username.toLowerCase().includes(searchLower) ||
+            (user.email && user.email.toLowerCase().includes(searchLower))
+        );
+    }
+    
+    // console.log('📊 Résultat après filtre statut:', result.length, 'utilisateurs');
+    filteredUsers = result;
+    currentPage = 1;
+    displayUsers();
+}
+
+function sortUsers(sortBy) {
+    // console.log('🔄 Tri par:', sortBy);
+    
+    filteredUsers.sort((a, b) => {
+        switch(sortBy) {
+            case 'username':
+                return a.username.localeCompare(b.username);
+            case 'date_joined':
+                return new Date(b.date_joined) - new Date(a.date_joined);
+            case 'last_login':
+                if (!a.last_login) return 1;
+                if (!b.last_login) return -1;
+                return new Date(b.last_login) - new Date(a.last_login);
+            default:
+                return 0;
+        }
+    });
+    currentPage = 1;
+    displayUsers();
+}
+
+function searchUsers(query) {
+    // console.log('🔄 Recherche:', query);
+    
+    // Partir de toutes les données
+    let result = [...allUsers];
+    
+    // Appliquer la recherche
+    if (query && query.trim() !== '') {
+        const searchLower = query.toLowerCase().trim();
+        result = result.filter(user => 
+            user.username.toLowerCase().includes(searchLower) ||
+            (user.email && user.email.toLowerCase().includes(searchLower))
+        );
+    }
+    
+    // Appliquer le filtre de rôle s'il est sélectionné
+    const roleFilter = document.getElementById('userRoleFilter').value;
+    if (roleFilter && roleFilter !== '') {
+        result = result.filter(user => {
+            if (roleFilter === 'admin') return user.is_superuser;
+            if (roleFilter === 'client') return !user.is_superuser;
+            return true;
+        });
+    }
+    
+    // Appliquer le filtre de statut s'il est sélectionné
+    const statusFilter = document.getElementById('userStatusFilter').value;
+    if (statusFilter && statusFilter !== '') {
+        result = result.filter(user => {
+            if (statusFilter === 'active') return user.is_active;
+            if (statusFilter === 'inactive') return !user.is_active;
+            return true;
+        });
+    }
+    
+    // console.log('📊 Résultat après recherche:', result.length, 'utilisateurs');
+    filteredUsers = result;
+    currentPage = 1;
+    displayUsers();
+}
+
+// Fonction pour réinitialiser tous les filtres
+function resetAllFilters() {
+    // console.log('🔄 Réinitialisation de tous les filtres');
+    
+    // Réinitialiser les valeurs des selects
+    document.getElementById('userRoleFilter').value = '';
+    document.getElementById('userStatusFilter').value = '';
+    document.getElementById('userSortFilter').value = 'date_joined';
+    document.getElementById('userSearchInput').value = '';
+    
+    // Réinitialiser les données
+    filteredUsers = [...allUsers];
+    currentPage = 1;
+    
+    // Réappliquer le tri par défaut
+    sortUsers('date_joined');
+}
+
+async function deleteUser(userId, username) {
+    if (!confirm(`Voulez-vous vraiment supprimer l'utilisateur "${username}" ?\n\nCette action est irréversible et supprimera également toutes ses commandes et messages.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/users/${userId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            await loadUsers();
+        } else {
+            showNotification(data.error || 'Erreur lors de la suppression', 'error');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('Erreur de connexion', 'error');
+    }
+}
+
+async function viewUserOrders(userId) {
+    try {
+        const response = await fetch(`/api/users/${userId}/orders/`);
+        const data = await response.json();
+        
+        // console.log('📦 Commandes utilisateur:', data);
+        
+        const ordersList = document.getElementById('userOrdersList');
+        
+        if (!data.success) {
+            ordersList.innerHTML = `<div class="error">Erreur: ${data.error || 'Impossible de charger les commandes'}</div>`;
+            return;
+        }
+        
+        const orders = data.orders || [];
+        
+        if (orders.length === 0) {
+            ordersList.innerHTML = '<div class="no-data">Cet utilisateur n\'a aucune commande.</div>';
+            return;
+        }
+        
+        // Créer le HTML pour les commandes
+        let ordersHtml = `
+            <div class="orders-summary">
+                <p><strong>Total de commandes:</strong> ${orders.length}</p>
+            </div>
+            <div class="orders-list">
+        `;
+        
+        orders.forEach(order => {
+            const statusClass = getStatusClass(order.status);
+            const statusText = getStatusText(order.status);
+            
+            ordersHtml += `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-id">#${order.id}</span>
+                        <span class="order-date">${formatDate(order.created_at)}</span>
+                        <span class="badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="order-body">
+                        <p><strong>Total:</strong> ${order.total_amount} CFA</p>
+                        <p><strong>Articles:</strong> ${order.items_count || 0}</p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        ordersHtml += '</div>';
+        ordersList.innerHTML = ordersHtml;
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement des commandes:', error);
+        const ordersList = document.getElementById('userOrdersList');
+        ordersList.innerHTML = '<div class="error">Erreur de connexion</div>';
+    }
+}
+
+// Fonctions utilitaires pour les commandes
+function getStatusClass(status) {
+    switch(status) {
+        case 'pending': return 'badge-warning';
+        case 'confirmed': return 'badge-info';
+        case 'preparing': return 'badge-primary';
+        case 'ready': return 'badge-success';
+        case 'delivered': return 'badge-success';
+        case 'cancelled': return 'badge-danger';
+        default: return 'badge-secondary';
+    }
+}
+
+function getStatusText(status) {
+    switch(status) {
+        case 'pending': return 'En attente';
+        case 'confirmed': return 'Confirmée';
+        case 'preparing': return 'En préparation';
+        case 'ready': return 'Prête';
+        case 'delivered': return 'Livrée';
+        case 'cancelled': return 'Annulée';
+        default: return status;
+    }
+}
+
+// Exporter les fonctions pour l'accès global
+window.filterOrdersByStatus = filterOrdersByStatus;
+window.filterMessagesByStatus = filterMessagesByStatus;
+window.loadContactMessages = loadContactMessages;
+window.createMessageCard = createMessageCard;
+window.markMessageAsRead = markMessageAsRead;
+window.markMessageAsReplied = markMessageAsReplied;
+window.toggleImageInput = toggleImageInput;
+window.loadUsers = loadUsers;
+window.createUserCard = createUserCard;
+window.viewUserOrders = viewUserOrders;
+window.toggleUserActive = toggleUserActive;
+window.deleteUser = deleteUser;
+window.filterUsersByRole = filterUsersByRole;
+window.filterUsersByStatus = filterUsersByStatus;
+window.sortUsers = sortUsers;
+window.searchUsers = searchUsers;
+window.resetAllFilters = resetAllFilters;
+window.showUserDetails = showUserDetails;
+window.showUserOrdersModal = showUserOrdersModal;
+window.showToggleUserModal = showToggleUserModal;
+window.showDeleteUserModal = showDeleteUserModal;
+window.closeUserDetailsModal = closeUserDetailsModal;
+window.closeUserOrdersModal = closeUserOrdersModal;
+window.closeToggleUserModal = closeToggleUserModal;
+window.closeDeleteUserModal = closeDeleteUserModal;
+window.goToPage = goToPage;
+window.getStatusClass = getStatusClass;
+window.getStatusText = getStatusText;
+window.getCsrfToken = getCsrfToken;
+window.formatDate = formatDate;
+
+// Gestion de l'upload d'image
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('productImageFile');
+    const imagePreview = document.getElementById('imagePreview');
+    const urlInput = document.getElementById('productImage');
+    const toggleUrlBtn = document.getElementById('toggleUrlInput');
+    
+    if (fileInput && imagePreview) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Aperçu">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+// Fonction pour basculer entre upload de fichier et URL
+function toggleImageInput() {
+    const fileInput = document.getElementById('productImageFile');
+    const urlInput = document.getElementById('productImage');
+    const toggleBtn = document.getElementById('toggleUrlInput');
+    
+    if (urlInput.style.display === 'none') {
+        // Afficher l'input URL
+        urlInput.style.display = 'block';
+        fileInput.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fas fa-upload"></i> Fichier';
+    } else {
+        // Afficher l'input fichier
+        urlInput.style.display = 'none';
+        fileInput.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="fas fa-link"></i> URL';
+    }
+}
+</script>
+{% endblock %}

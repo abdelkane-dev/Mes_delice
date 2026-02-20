@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Les Délices de Marie - Pâtisserie Artisanale{% endblock %}</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+        <link rel="shortcut icon" href="{% static 'favicon.svg' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-cookie-bite"></i>
+                <span>Les Délices de Marie</span>
+            </div>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                {% block navigation %}
+                <li class="nav-item">
+                    <a href="{% url 'client_view' %}" class="nav-link">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'products' %}" class="nav-link">
+                        <i class="fas fa-birthday-cake"></i> Nos Produits
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'orders' %}" class="nav-link">
+                        <i class="fas fa-shopping-bag"></i> Commandes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin_view' %}" class="nav-link">
+                        <i class="fas fa-cog"></i> Gestion
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'contact' %}" class="nav-link">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a>
+                </li>
+                {% endblock %}
+                
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scripts -->
+    <script>
+    // Suppress analytics (Amplitude) network errors logged by ad-blockers/extensions.
+    // This intercepts fetch calls to known analytics hosts and returns an empty
+    // response so the console isn't spammed with `net::ERR_BLOCKED_BY_CLIENT`.
+    (function(){
+        try {
+            const blockedHosts = ['api2.amplitude.com'];
+            const originalFetch = window.fetch.bind(window);
+            window.fetch = function(input, init){
+                try {
+                    const url = typeof input === 'string' ? input : (input && input.url) || '';
+                    if (blockedHosts.some(h => url && url.indexOf(h) !== -1)) {
+                        return Promise.resolve(new Response(null, {status:204, statusText: 'No Content'}));
+                    }
+                } catch (e) {
+                    // ignore and continue to original fetch
+                }
+                return originalFetch(input, init);
+            };
+        } catch (e) {
+            // If overriding fetch fails, do nothing.
+        }
+    })();
+    </script>
+    <script src="{% static 'js/api.js' %}?v={{ timestamp|default:'123' }}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/products.js' %}"></script>
+    <script src="{% static 'js/orders.js' %}"></script>
+    <script src="{% static 'js/management.js' %}"></script>
+    <script src="{% static 'js/contact.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

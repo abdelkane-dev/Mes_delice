@@ -1,0 +1,768 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Les Délices de Marie - Pâtisserie Artisanale{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a href="#" class="nav-link active" data-page="home">
+        <i class="fas fa-home"></i> Accueil
+    </a>
+</li>
+<li class="nav-item">
+    <a href="#" class="nav-link" data-page="products">
+        <i class="fas fa-birthday-cake"></i> Produits
+    </a>
+</li>
+<li class="nav-item">
+    <a href="#" class="nav-link" data-page="orders">
+        <i class="fas fa-shopping-bag"></i> Commandes
+    </a>
+</li>
+<li class="nav-item">
+    <a href="#" class="nav-link" data-page="contact">
+        <i class="fas fa-envelope"></i> Contact
+    </a>
+</li>
+
+{% endblock %}
+
+{% block content %}
+<!-- Accueil -->
+<section id="home" class="page active">
+    <header class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Les Délices de Marie</h1>
+            <p class="hero-subtitle">L'art de la pâtisserie Maliene</p>
+            <p class="hero-description">Découvrez nos créations artisanales, préparées avec amour et des ingrédients sélectionnés pour votre plus grand plaisir.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="showPage('products')">Découvrir nos produits</button>
+                <button class="btn btn-secondary" onclick="showPage('contact')">Nous contacter</button>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="pastry-showcase">
+                <div class="pastry-item">
+                    <i class="fas fa-birthday-cake"></i>
+                </div>
+                <div class="pastry-item">
+                    <i class="fas fa-cookie"></i>
+                </div>
+                <div class="pastry-item">
+                    <i class="fas fa-ice-cream"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Notre engagement qualité</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Ingrédients frais</h3>
+                    <p>Nous sélectionnons avec soin chaque ingrédient pour garantir la fraîcheur et la qualité de nos créations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <h3>Fait maison</h3>
+                    <p>Chaque pâtisserie est préparée à la main dans notre atelier avec le plus grand soin.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3>Artisanat d'excellence</h3>
+                    <p>Des recettes traditionnelles revisitées avec créativité pour des saveurs uniques.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+<!-- Produits -->
+<section id="products" class="page">
+    <div class="container">
+        <h2 class="section-title">Nos Délices</h2>
+        <div class="products-grid" id="productsGrid">
+            <!-- Les produits seront chargés dynamiquement -->
+            <!-- Template HTML pour une carte produit (facultatif : peut être cloné par le JS) -->
+            <template id="product-template">
+                <article class="product-card">
+                    <div class="product-image">
+                        <img src="{{image}}" alt="{{name}}" onerror='this.parentElement.innerHTML="<i class=&quot;fas fa-birthday-cake&quot;></i>"'>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">{{name}}</h3>
+                        <p class="product-description">{{description}}</p>
+                        <div class="product-footer">
+                            <span class="product-price">{{price}}</span>
+                            <span class="product-stock">{{stock_text}}</span>
+                        </div>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </div>
+</section>
+
+<!-- Commandes -->
+<section id="orders" class="page">
+    <div class="container">
+        <h2 class="section-title">Vos Commandes</h2>
+        <div class="orders-container" id="ordersContainer">
+            <!-- Les commandes seront chargées dynamiquement -->
+            <!-- Template HTML pour une carte commande (facultatif : peut être cloné par le JS) -->
+            <template id="order-template">
+                <article class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <h4>Commande #{{id}}</h4>
+                            <p class="order-customer">{{customer_name}}</p>
+                            <p class="order-date">{{created_at}}</p>
+                        </div>
+                        <span class="order-status {{status}}">{{status_label}}</span>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-items-summary">
+                            <strong>{{items_count}} article(s)</strong> - {{total_price}}
+                        </div>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </div>
+</section>
+
+<!-- Gestion -->
+<section id="management" class="page">
+    <div class="container">
+        <h2 class="section-title">Gestion de la pâtisserie</h2>
+        <div class="management-tabs">
+            <button class="tab-btn active" data-tab="products-management">Produits</button>
+            <button class="tab-btn" data-tab="stock-management">Stocks</button>
+            <button class="tab-btn" data-tab="orders-management">Commandes</button>
+        </div>
+        
+        <div class="tab-content">
+            <div id="products-management" class="tab-panel active">
+                <div class="management-header">
+                    <h3>Gestion des produits</h3>
+                    <button class="btn btn-primary" onclick="openProductModal()">
+                        <i class="fas fa-plus"></i> Ajouter un produit
+                    </button>
+                </div>
+                <div class="products-management-grid" id="productsManagementGrid">
+                    <!-- Produits pour la gestion -->
+                </div>
+            </div>
+            
+            <div id="stock-management" class="tab-panel">
+                <h3>Gestion des stocks</h3>
+                <div class="stock-grid" id="stockGrid">
+                    <!-- Stocks -->
+                </div>
+            </div>
+            
+            <div id="orders-management" class="tab-panel">
+                <h3>Gestion des commandes</h3>
+                <div class="orders-management-grid" id="ordersManagementGrid">
+                    <!-- Commandes pour la gestion -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" class="page">
+    <div class="container">
+        <h2 class="section-title">Contactez-nous</h2>
+        <div class="contact-content">
+            <div class="contact-info">
+                <h3>Nos coordonnées</h3>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <strong>Adresse</strong>
+                        <p> Mali,  Bamako</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Téléphone</strong>
+                        <p>76 23 45 67 </p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>Email</strong>
+                        <p>contact@delicesdemarie.fr</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Horaires</strong>
+                        <p>Mardi - Samedi : 8h00 - 19h00</p>
+                        <p>Dimanche : 8h00 - 13h00</p>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-form-container">
+                <form class="contact-form" id="contactForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Nom complet</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Téléphone</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Sujet</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">Sélectionnez un sujet</option>
+                            <option value="commande">Passer une commande</option>
+                            <option value="renseignement">Demande de renseignement</option>
+                            <option value="allergene">Information sur les allergènes</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Envoyer le message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal pour ajouter/modifier un produit -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Ajouter un produit</h3>
+            <button class="modal-close" onclick="closeProductModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="productForm" class="modal-form">
+            <div class="form-group">
+                <label for="productName">Nom du produit</label>
+                <input type="text" id="productName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="productDescription">Description</label>
+                <textarea id="productDescription" name="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">Prix (cfa)</label>
+                <input type="number" id="productPrice" name="price" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="productStock">Stock disponible</label>
+                <input type="number" id="productStock" name="stock" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="productImage">URL de l'image</label>
+                <div class="image-input-row">
+                    <input type="url" id="productImage" name="image" placeholder="https://exemple.com/image.jpg" style="display:none;">
+                    <input type="file" id="productImageFile" name="image_file" accept="image/*">
+                    <button type="button" class="btn btn-secondary" id="toggleUrlInput" onclick="toggleImageInput()">
+                        <i class="fas fa-link"></i> URL
+                    </button>
+                </div>
+                <div id="imagePreview" class="image-preview" style="margin-top:0.5rem;">
+                    <i class="fas fa-image"></i>
+                    <span>Aperçu de l'image</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="productCategory">Catégorie</label>
+                <select id="productCategory" name="category" required>
+                    <option value="">Sélectionnez une catégorie</option>
+                    <option value="gateaux">Gâteaux</option>
+                    <option value="patisseries">Pâtisseries</option>
+                    <option value="viennoiseries">Viennoiseries</option>
+                    <option value="macarons">Macarons</option>
+                    <option value="chocolats">Chocolats</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Styles pour les boutons d'action des commandes */
+.order-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Styles pour les popups modales */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+    background: linear-gradient(135deg, #f8c8dc 0%, #9c7a4a 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.modal-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid #eee;
+    background-color: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+/* Styles pour les détails de commande dans la popup */
+.order-details {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.order-info-section,
+.order-customer-section,
+.order-items-section,
+.order-notes-section,
+.order-total-section {
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.order-info-section h4,
+.order-customer-section h4,
+.order-items-section h4,
+.order-notes-section h4,
+.order-total-section h4 {
+    margin: 0 0 1rem 0;
+    color: #9c7a4a;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #f8c8dc;
+    padding-bottom: 0.5rem;
+}
+
+.order-item-detail {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.8rem;
+    border: 1px solid #e9ecef;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+}
+
+.item-quantity {
+    background-color: #f8c8dc;
+    color: #9c7a4a;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.item-name {
+    flex: 1;
+    margin: 0 1rem;
+}
+
+.item-price {
+    font-weight: 600;
+    color: #28a745;
+}
+
+.item-details {
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #9c7a4a;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Styles pour le formulaire de modification */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #f8c8dc;
+    box-shadow: 0 0 0 3px rgba(248, 200, 220, 0.1);
+}
+
+.order-items-edit {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    background-color: #fafafa;
+}
+
+.item-edit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem;
+    border-bottom: 1px solid #eee;
+}
+
+.item-edit-row:last-child {
+    border-bottom: none;
+}
+
+.item-quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.item-quantity-control button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.item-quantity-control button:hover {
+    background-color: #f8c8dc;
+    border-color: #f8c8dc;
+}
+
+.item-quantity-control input {
+    width: 60px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.3rem;
+}
+
+/* Styles pour la popup de commande */
+.product-summary {
+    background: linear-gradient(135deg, #f8c8dc 0%, #9c7a4a 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.product-summary h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.product-summary .product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.product-summary .stock-info {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+}
+
+.quantity-control button {
+    width: 35px;
+    height: 35px;
+    border: 2px solid #f8c8dc;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #9c7a4a;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-control button:hover {
+    background-color: #f8c8dc;
+    color: white;
+    transform: scale(1.05);
+}
+
+.quantity-control input {
+    width: 60px;
+    text-align: center;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.order-summary {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-row.total {
+    border-top: 2px solid #9c7a4a;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    font-size: 1.1rem;
+    color: #9c7a4a;
+}
+
+.summary-row.total strong {
+    color: #9c7a4a;
+}
+
+/* Responsive pour la popup de commande */
+@media (max-width: 768px) {
+    .product-summary {
+        padding: 1rem;
+    }
+    
+    .product-summary h4 {
+        font-size: 1.1rem;
+    }
+    
+    .product-summary .product-price {
+        font-size: 1.2rem;
+    }
+    
+    .quantity-control {
+        margin: 0 auto;
+    }
+    
+    .order-summary {
+        margin-top: 1rem;
+    }
+    
+    .summary-row {
+        font-size: 0.9rem;
+    }
+    
+    .summary-row.total {
+        font-size: 1rem;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
+    
+    .order-actions {
+        flex-direction: column;
+    }
+    
+    .btn-sm {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .item-edit-row {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    
+    .item-quantity-control {
+        align-self: center;
+    }
+}
+</style>
+{% endblock %}
