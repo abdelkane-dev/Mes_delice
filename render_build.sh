@@ -3,8 +3,21 @@
 echo "🔨 Installation des dépendances..."
 pip install -r requirements.txt
 
-echo "�️  Migration de la base de données..."
+echo "🔍 Diagnostic de la configuration..."
+python debug_render.py
+
+echo "🗄️  Migration de la base de données..."
 python manage.py migrate --noinput
+
+echo "� Création superuser si nécessaire..."
+python manage.py shell -c "
+from django.contrib.auth.models import User
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser('admin', 'admin@delices.com', 'admin123')
+    print('✅ Superuser admin créé')
+else:
+    print('✅ Superuser admin existe déjà')
+"
 
 echo "�📁 Création des répertoires statiques..."
 mkdir -p staticfiles/css
