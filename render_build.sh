@@ -3,7 +3,10 @@
 echo "🔨 Installation des dépendances..."
 pip install -r requirements.txt
 
-echo "📁 Création des répertoires statiques..."
+echo "�️  Migration de la base de données..."
+python manage.py migrate --noinput
+
+echo "�📁 Création des répertoires statiques..."
 mkdir -p staticfiles/css
 mkdir -p staticfiles/js
 mkdir -p staticfiles/images
