@@ -73,8 +73,10 @@ WSGI_APPLICATION = 'delices_backend.wsgi.application'
 # Configuration PostgreSQL avec fallback pour développement local
 DATABASE_URL = config('DATABASE_URL', default=None)
 
+# Forcer l'utilisation de DATABASE_URL s'il existe (priorité absolue)
 if DATABASE_URL:
     # Production avec DATABASE_URL (Render ou autre)
+    print(f"DEBUG: Utilisation de DATABASE_URL: {DATABASE_URL[:20]}...")
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -85,6 +87,7 @@ if DATABASE_URL:
     }
 else:
     # Développement local avec PostgreSQL - configuration explicite
+    print("DEBUG: Utilisation configuration locale PostgreSQL")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
