@@ -73,16 +73,32 @@ WSGI_APPLICATION = 'delices_backend.wsgi.application'
 # Configuration PostgreSQL avec fallback pour développement local
 DATABASE_URL = config('DATABASE_URL', default=None)
 
-# Forcer l'utilisation de DATABASE_URL s'il existe (priorité absolue)
-if DATABASE_URL:
-    # Production avec DATABASE_URL (Render ou autre)
-    print(f"DEBUG: Utilisation de DATABASE_URL: {DATABASE_URL[:20]}...")
+# Détecter si on est sur Render
+IS_RENDER = 'RENDER_SERVICE_ID' in os.environ or 'RENDER_EXTERNAL_HOSTNAME' in os.environ
+
+print(f"DEBUG: IS_RENDER={IS_RENDER}")
+print(f"DEBUG: DATABASE_URL exists={bool(DATABASE_URL)}")
+
+if IS_RENDER and DATABASE_URL:
+    # Production Render - FORCER l'utilisation de DATABASE_URL
+    print(f"DEBUG: Utilisation DATABASE_URL Render: {DATABASE_URL[:30]}...")
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
             ssl_require=False,  # Render gère le SSL automatiquement
+        )
+    }
+elif DATABASE_URL:
+    # Autre environnement de production
+    print(f"DEBUG: Utilisation DATABASE_URL autre: {DATABASE_URL[:30]}...")
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=False,
         )
     }
 else:
