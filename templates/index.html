@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dily's Kitchen - Pâtisserie Restauration</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Meta tags pour SEO -->
+    <meta name="description" content="Dily's Kitchen - Pâtisserie Restauration artisanale avec amour et passion">
+    <meta name="keywords" content="pâtisserie, restauration, artisanal, Dily's Kitchen">
+    <meta name="author" content="Dily's Kitchen">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar client-nav" id="clientNav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-cookie-bite"></i>
+                <span>Dily's Kitchen</span>
+            </div>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-page="home">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="products">
+                        <i class="fas fa-birthday-cake"></i> Nos Produits
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="orders">
+                        <i class="fas fa-shopping-bag"></i> Commandes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="contact">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link logout-btn" id="clientAuthBtn" onclick="showLoginPage()">
+                        <i class="fas fa-sign-in-alt"></i> Connexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Navigation Admin -->
+    <nav class="navbar admin-nav" id="adminNav" style="display: none;">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-cookie-bite"></i>
+                <span>Dily's Kitchen - Admin</span>
+            </div>
+            <button class="nav-toggle" id="adminNavToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="adminNavMenu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-page="home">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="products">
+                        <i class="fas fa-birthday-cake"></i> Nos Produits
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="orders">
+                        <i class="fas fa-shopping-bag"></i> Commandes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="management">
+                        <i class="fas fa-cog"></i> Gestion
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="contact">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Page de Login -->
+        <section id="login" class="page">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <div class="login-logo">
+                            <i class="fas fa-cookie-bite"></i>
+                            <h1>Dily's Kitchen</h1>
+                            <p>Pâtisserie Restauration</p>
+                        </div>
+                    </div>
+
+                    <div class="login-content">
+                        <h2>Connexion</h2>
+                        <p class="login-subtitle">Choisissez votre mode d'accès</p>
+
+                        <div class="login-modes">
+                            <button class="login-mode-btn client-mode" id="clientModeBtn">
+                                <i class="fas fa-user"></i>
+                                <div class="mode-info">
+                                    <h3>Mode Client</h3>
+                                    <p>Se connecter ou créer un compte</p>
+                                </div>
+                            </button>
+
+                            <button class="login-mode-btn admin-mode" id="adminModeBtn">
+                                <i class="fas fa-user-shield"></i>
+                                <div class="mode-info">
+                                    <h3>Mode Administrateur</h3>
+                                    <p>Gérer les produits, stocks et commandes</p>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div class="login-form" id="loginForm" style="display: none;">
+                            <div class="form-tabs">
+                                <button class="tab-btn active" id="loginTab">Connexion</button>
+                                <button class="tab-btn" id="registerTab">Inscription</button>
+                            </div>
+                            
+                            <div class="form-panel" id="loginPanel">
+                                <form id="authForm">
+                                    <div class="form-group">
+                                        <label for="username">Nom d'utilisateur</label>
+                                        <input type="text" id="username" name="username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password">Mot de passe</label>
+                                        <input type="password" id="password" name="password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-full">
+                                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <div class="form-panel" id="registerPanel" style="display: none;">
+                                <form id="registerForm">
+                                    <div class="form-group">
+                                        <label for="reg_username">Nom d'utilisateur</label>
+                                        <input type="text" id="reg_username" name="username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" name="email" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="first_name">Prénom</label>
+                                        <input type="text" id="first_name" name="first_name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="last_name">Nom</label>
+                                        <input type="text" id="last_name" name="last_name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg_password">Mot de passe</label>
+                                        <input type="password" id="reg_password" name="password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password_confirm">Confirmer le mot de passe</label>
+                                        <input type="password" id="password_confirm" name="password_confirm" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-full">
+                                        <i class="fas fa-user-plus"></i> Créer un compte
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn btn-secondary" id="backBtn">
+                                    <i class="fas fa-arrow-left"></i> Retour
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Accueil -->
+        <section id="home" class="page">
+            <header class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Dily's Kitchen</h1>
+                    <p class="hero-subtitle">Une dose d'amour fait avec passion</p>
+                    <p class="hero-description">Découvrez nos créations artisanales, préparées avec amour et des ingrédients sélectionnés pour votre plus grand plaisir.</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="showPage('products')">Découvrir nos produits</button>
+                        <button class="btn btn-secondary" onclick="showPage('contact')">Nous contacter</button>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="pastry-showcase">
+                        <div class="pastry-item">
+                            <i class="fas fa-birthday-cake"></i>
+                        </div>
+                        <div class="pastry-item">
+                            <i class="fas fa-cookie"></i>
+                        </div>
+                        <div class="pastry-item">
+                            <i class="fas fa-ice-cream"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section class="features">
+                <div class="container">
+                    <h2 class="section-title">Notre engagement qualité</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <h3>Ingrédients frais</h3>
+                            <p>Nous sélectionnons avec soin chaque ingrédient pour garantir la fraîcheur et la qualité de nos créations.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-hand-holding-heart"></i>
+                            </div>
+                            <h3>Fait maison</h3>
+                            <p>Chaque pâtisserie est préparée à la main dans notre atelier avec le plus grand soin.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-award"></i>
+                            </div>
+                            <h3>Artisanat d'excellence</h3>
+                            <p>Des recettes traditionnelles revisitées avec créativité pour des saveurs uniques.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Produits -->
+        <section id="products" class="page">
+            <div class="container">
+                <h2 class="section-title">Nos Délices</h2>
+                <div class="products-grid" id="productsGrid">
+                    <!-- Les produits seront chargés dynamiquement -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Commandes -->
+        <section id="orders" class="page">
+            <div class="container">
+                <h2 class="section-title">Vos Commandes</h2>
+                <div class="orders-container" id="ordersContainer">
+                    <!-- Les commandes seront chargées dynamiquement -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Gestion (Admin) -->
+        <section id="management" class="page">
+            <div class="container">
+                <h2 class="section-title">Gestion</h2>
+                
+                <!-- Tabs de gestion -->
+                <div class="management-tabs">
+                    <button class="tab-btn active" data-tab="products">Produits</button>
+                    <button class="tab-btn" data-tab="orders">Commandes</button>
+                    <button class="tab-btn" data-tab="users">Utilisateurs</button>
+                </div>
+
+                <!-- Contenu des tabs -->
+                <div class="management-content">
+                    <!-- Tab Produits -->
+                    <div class="tab-panel active" id="products-tab">
+                        <div class="management-header">
+                            <h3>Gestion des Produits</h3>
+                            <button class="btn btn-primary" id="addProductBtn">
+                                <i class="fas fa-plus"></i> Ajouter un produit
+                            </button>
+                        </div>
+                        <div class="products-management" id="productsManagement">
+                            <!-- Les produits seront chargés dynamiquement -->
+                        </div>
+                    </div>
+
+                    <!-- Tab Commandes -->
+                    <div class="tab-panel" id="orders-tab">
+                        <div class="management-header">
+                            <h3>Gestion des Commandes</h3>
+                        </div>
+                        <div class="orders-management" id="ordersManagement">
+                            <!-- Les commandes seront chargées dynamiquement -->
+                        </div>
+                    </div>
+
+                    <!-- Tab Utilisateurs -->
+                    <div class="tab-panel" id="users-tab">
+                        <div class="management-header">
+                            <h3>Gestion des Utilisateurs</h3>
+                        </div>
+                        <div class="users-management" id="usersManagement">
+                            <!-- Les utilisateurs seront chargés dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="page">
+            <div class="container">
+                <h2 class="section-title">Contactez-nous</h2>
+                
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Informations de contact</h3>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Adresse</h4>
+                                <p>Dakar, Sénégal</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h4>Téléphone</h4>
+                                <p>+221 77 123 45 67</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>contact@dilyskitchen.sn</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h4>Horaires</h4>
+                                <p>Lun-Dim: 7h - 20h</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-form">
+                        <h3>Envoyez-nous un message</h3>
+                        <form id="contactForm">
+                            <div class="form-group">
+                                <label for="contactName">Nom</label>
+                                <input type="text" id="contactName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">Email</label>
+                                <input type="email" id="contactEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactSubject">Sujet</label>
+                                <select id="contactSubject" name="subject" required>
+                                    <option value="">Choisissez un sujet</option>
+                                    <option value="commande">Commande</option>
+                                    <option value="information">Information</option>
+                                    <option value="reclamation">Réclamation</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactMessage">Message</label>
+                                <textarea id="contactMessage" name="message" rows="5" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Envoyer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Dily's Kitchen</h3>
+                <p>Une dose d'amour fait avec passion</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p><i class="fas fa-phone"></i> +221 77 123 45 67</p>
+                <p><i class="fas fa-envelope"></i> contact@dilyskitchen.sn</p>
+            </div>
+            <div class="footer-section">
+                <h4>Horaires</h4>
+                <p>Lun-Dim: 7h - 20h</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Dily's Kitchen. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/products.js"></script>
+    <script src="/static/js/orders.js"></script>
+    <script src="/static/js/management.js"></script>
+    <script src="/static/js/contact.js"></script>
+    <script src="/static/js/login.js"></script>
+</body>
+</html>
