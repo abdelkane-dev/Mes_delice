@@ -15,7 +15,7 @@ products = [
     {
         'name': 'Tarte aux Fraises',
         'description': 'Une délicieuse tarte aux fraises fraîches sur une base de pâte sablée',
-        'price': 18.50,
+        'price': 12125.00,  # 18.50€ × 655
         'stock': 10,
         'category': 'gateaux',
         'available': True
@@ -23,7 +23,7 @@ products = [
     {
         'name': 'Éclair au Chocolat',
         'description': 'Éclair traditionnel fourré à la crème pâtissière au chocolat',
-        'price': 4.50,
+        'price': 2947.50,   # 4.50€ × 655
         'stock': 25,
         'category': 'patisseries',
         'available': True
@@ -31,7 +31,7 @@ products = [
     {
         'name': 'Croissant au Beurre',
         'description': 'Croissant artisanal au beurre AOP, croustillant et doré',
-        'price': 1.50,
+        'price': 982.50,    # 1.50€ × 655
         'stock': 50,
         'category': 'viennoiseries',
         'available': True
@@ -39,7 +39,7 @@ products = [
     {
         'name': 'Macaron Pistache',
         'description': 'Macaron délicat à la pistache de Sicile',
-        'price': 2.80,
+        'price': 1834.00,   # 2.80€ × 655
         'stock': 30,
         'category': 'macarons',
         'available': True
@@ -47,7 +47,7 @@ products = [
     {
         'name': 'Truffes au Chocolat',
         'description': 'Truffes artisanales au chocolat noir 70%',
-        'price': 15.00,
+        'price': 9825.00,   # 15.00€ × 655
         'stock': 0,  # Rupture de stock
         'category': 'chocolats',
         'available': False
@@ -56,6 +56,6 @@ products = [
 
 for product_data in products:
     product = Product.objects.create(**product_data)
-    print(f"✅ Produit créé : {product.name} - {product.price}€ (stock: {product.stock})")
+    print(f"✅ Produit créé : {product.name} - {product.price} FCFA (stock: {product.stock})")
 
 print(f"\n✅ {Product.objects.count()} produits créés avec succès!")

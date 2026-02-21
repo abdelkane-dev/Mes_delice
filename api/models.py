@@ -23,7 +23,7 @@ class Product(models.Model):
         max_digits=10, 
         decimal_places=2, 
         validators=[MinValueValidator(Decimal('0.01'))],
-        verbose_name="Prix (€)"
+        verbose_name="Prix (FCFA)"
     )
     stock = models.PositiveIntegerField(
         default=0, 
@@ -147,7 +147,7 @@ class Order(models.Model):
         max_digits=10, 
         decimal_places=2, 
         default=0.00,
-        verbose_name="Prix total (€)"
+        verbose_name="Prix total (FCFA)"
     )
     created_at = models.DateTimeField(
         auto_now_add=True, 
@@ -228,7 +228,7 @@ class OrderItem(models.Model):
     unit_price = models.DecimalField(
         max_digits=10, 
         decimal_places=2,
-        verbose_name="Prix unitaire (€)"
+        verbose_name="Prix unitaire (FCFA)"
     )
     created_at = models.DateTimeField(
         auto_now_add=True, 

@@ -54,7 +54,7 @@ class OrderItemInline(admin.TabularInline):
     def total_price(self, obj):
         """Affiche le prix total de l'article"""
         if obj.id:
-            return f"{obj.total_price:.2f} €"
+            return f"{obj.total_price:.2f} FCFA"
         return "-"
     
     total_price.short_description = 'Prix total'
@@ -127,7 +127,7 @@ class OrderItemAdmin(admin.ModelAdmin):
     
     def total_price_display(self, obj):
         """Affiche le prix total"""
-        return f"{obj.total_price:.2f} €"
+        return f"{obj.total_price:.2f} FCFA"
     
     total_price_display.short_description = 'Prix total'
 
