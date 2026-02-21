@@ -79,17 +79,30 @@ IS_RENDER = 'RENDER_SERVICE_ID' in os.environ or 'RENDER_EXTERNAL_HOSTNAME' in o
 print(f"DEBUG: IS_RENDER={IS_RENDER}")
 print(f"DEBUG: DATABASE_URL exists={bool(DATABASE_URL)}")
 
-if IS_RENDER and DATABASE_URL:
-    # Production Render - FORCER l'utilisation de DATABASE_URL
-    print(f"DEBUG: Utilisation DATABASE_URL Render: {DATABASE_URL[:30]}...")
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-            ssl_require=False,  # Render gère le SSL automatiquement
-        )
-    }
+# FORCER la configuration Render si on détecte l'environnement Render
+if IS_RENDER:
+    # Render - utiliser DATABASE_URL ou configuration en dur
+    if DATABASE_URL:
+        print(f"DEBUG: Utilisation DATABASE_URL Render: {DATABASE_URL[:30]}...")
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+                ssl_require=False,
+            )
+        }
+    else:
+        # Render mais pas de DATABASE_URL - utiliser la configuration Render par défaut
+        print("DEBUG: Render détecté mais pas de DATABASE_URL - configuration par défaut")
+        DATABASES = {
+            'default': dj_database_url.config(
+                default='postgresql://dilys_kitchen_db_user:PvD06k0r8uFWEpkmi6Pje5Qy1KFdyt3q@dpg-d6coqt95pdvs73f84m60-a.oregon-postgres.render.com/dilys_kitchen_db',
+                conn_max_age=600,
+                conn_health_checks=True,
+                ssl_require=False,
+            )
+        }
 elif DATABASE_URL:
     # Autre environnement de production
     print(f"DEBUG: Utilisation DATABASE_URL autre: {DATABASE_URL[:30]}...")
