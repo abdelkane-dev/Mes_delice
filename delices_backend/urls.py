@@ -41,10 +41,9 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),  # Déconnexion
 ]
 
-# Servir les fichiers media et static en développement
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# Servir les fichiers media et static en développement ET production
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Configuration de l'admin
 admin.site.site_header = "Les Délices de Marie - Administration"
