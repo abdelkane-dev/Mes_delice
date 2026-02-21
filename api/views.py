@@ -508,22 +508,32 @@ def login_view(request):
             return redirect('client_view')
     
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            messages.success(request, f'Bienvenue, {user.username}!')
+        try:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
             
-            # Redirection selon le rôle
-            if user.is_superuser:
-                return redirect('admin_view')
+            print(f"DEBUG: Tentative connexion - username: {username}")
+            
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Bienvenue, {user.username}!')
+                
+                # Redirection selon le rôle
+                if user.is_superuser:
+                    return redirect('admin_view')
+                else:
+                    return redirect('client_view')
             else:
-                return redirect('client_view')
-        else:
-            messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
+                messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
+                print(f"DEBUG: Échec connexion pour {username}")
+                
+        except Exception as e:
+            print(f"ERROR: Erreur connexion: {e}")
+            import traceback
+            traceback.print_exc()
+            messages.error(request, f'Erreur technique: {str(e)}')
     
     return render(request, 'login.html')
 
@@ -536,29 +546,39 @@ def register_view(request):
         return redirect('client_view')
     
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        password_confirm = request.POST.get('password_confirm')
-        
-        # Validation
-        if not username or not email or not password:
-            messages.error(request, 'Tous les champs sont obligatoires.')
-        elif password != password_confirm:
-            messages.error(request, 'Les mots de passe ne correspondent pas.')
-        elif User.objects.filter(username=username).exists():
-            messages.error(request, 'Ce nom d\'utilisateur existe déjà.')
-        elif User.objects.filter(email=email).exists():
-            messages.error(request, 'Cet email est déjà utilisé.')
-        else:
-            # Créer le compte client (pas de superuser)
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password
-            )
-            messages.success(request, 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.')
-            return redirect('login')
+        try:
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            password_confirm = request.POST.get('password_confirm')
+            
+            print(f"DEBUG: Tentative inscription - username: {username}, email: {email}")
+            
+            # Validation
+            if not username or not email or not password:
+                messages.error(request, 'Tous les champs sont obligatoires.')
+            elif password != password_confirm:
+                messages.error(request, 'Les mots de passe ne correspondent pas.')
+            elif User.objects.filter(username=username).exists():
+                messages.error(request, 'Ce nom d\'utilisateur existe déjà.')
+            elif User.objects.filter(email=email).exists():
+                messages.error(request, 'Cet email est déjà utilisé.')
+            else:
+                # Créer le compte client (pas de superuser)
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password
+                )
+                messages.success(request, f'Compte créé pour {username}! Vous pouvez maintenant vous connecter.')
+                print(f"DEBUG: Compte créé avec succès - {username}")
+                return redirect('login')
+                
+        except Exception as e:
+            print(f"ERROR: Erreur inscription: {e}")
+            import traceback
+            traceback.print_exc()
+            messages.error(request, f'Erreur technique: {str(e)}')
     
     return render(request, 'register.html')
 
