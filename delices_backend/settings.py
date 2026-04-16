@@ -73,9 +73,9 @@ WSGI_APPLICATION = 'delices_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'nom_de_ta_base',
-        'USER': 'ton_utilisateur',
-        'PASSWORD': 'ton_mot_de_passe',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
