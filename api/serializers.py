@@ -1,13 +1,31 @@
 from rest_framework import serializers
+from django.core.validators import URLValidator
 from .models import Product, Order, OrderItem, ContactMessage
 
 class ProductSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(max_length=None, use_url=True, required=False)
+    image = serializers.CharField(allow_blank=True, required=False)
     
     class Meta:
         model = Product
         fields = ['id', 'name', 'description', 'price', 'category', 'stock', 'available', 'image', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def validate_image(self, value):
+        # Accepter les URLs et les fichiers
+        if not value:
+            return None
+            
+        # Si c'est une URL valide
+        if value.startswith(('http://', 'https://')):
+            url_validator = URLValidator()
+            try:
+                url_validator(value)
+                return value
+            except:
+                raise serializers.ValidationError("URL d'image invalide")
+        
+        # Si c'est un fichier uploadé
+        return value
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
