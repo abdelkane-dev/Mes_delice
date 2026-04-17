@@ -127,3 +127,15 @@ class ContactMessageDetail(viewsets.ModelViewSet):
             return ContactMessage.objects.all()
         else:
             return ContactMessage.objects.filter(user=self.request.user)
+
+# Vues pour les notifications
+@api_view(['GET'])
+def notifications_recent(request):
+    """Récupérer les notifications récentes"""
+    notifications = []
+    return Response(notifications)
+
+@api_view(['GET'])
+def notifications_unread_count(request):
+    """Compter les notifications non lues"""
+    return Response({'count': 0})
