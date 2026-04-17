@@ -1,13 +1,20 @@
-#!/usr/bin/env bash
-# exit on error
-set -o errexit
+#!/bin/bash
+# Script de build pour Render
 
-# Installer les d√©pendances
-pip install --upgrade pip
+echo "Ì¥® Installation des d√©pendances..."
 pip install -r requirements.txt
 
-# Collecter les fichiers statiques
-python manage.py collectstatic --no-input
+echo "Ì¥ç Diagnostic de la configuration..."
+python debug_render.py
 
-# Appliquer les migrations
-python manage.py migrate --no-input
+echo "Ì∑ÑÔ∏è Migration de la base de donn√©es..."
+python manage.py migrate
+
+echo "Ì¥ß Cr√©ation superuser si n√©cessaire..."
+python manage.py shell << EOF
+from django.contrib.auth.models import User
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
+    print('‚úÖ Superuser cr√©√©')
+else:
+    print('‚úÖ Superuser existe d√©j√†')
