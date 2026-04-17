@@ -866,3 +866,42 @@ def users_management_view(request):
     }
     
     return render(request, 'users_management.html', context)
+
+# Vues pour les pages web
+def home(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('management')
+        else:
+            return redirect('client')
+    return redirect('login')
+
+def login_view(request):
+    if request.method == 'POST':
+        # Logique de connexion
+        pass
+    return render(request, 'login.html')
+
+def register_view(request):
+    if request.method == 'POST':
+        # Logique d'inscription
+        pass
+    return render(request, 'register.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+def client_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if request.user.is_staff:
+        return redirect('management')
+    return render(request, 'client.html')
+
+def management_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if not request.user.is_staff:
+        return redirect('client')
+    return render(request, 'admin.html')

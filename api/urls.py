@@ -1,16 +1,20 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from api.views import ProductViewSet, OrderViewSet, ContactMessageViewSet, NotificationViewSet, cancel_order_api
-
-# Créer un routeur pour les API REST
-router = DefaultRouter()
-router.register(r'products', ProductViewSet, basename='product')
-router.register(r'orders', OrderViewSet, basename='order')
-router.register(r'contact', ContactMessageViewSet, basename='contact')
-router.register(r'notifications', NotificationViewSet, basename='notification')
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('', include(router.urls)),
-    # URL d'annulation de commande (avec vérification 1h)
-    path('orders/<int:order_id>/cancel/', cancel_order_api, name='cancel_order'),
+    # Pages web
+    path('', views.home, name='home'),
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('logout/', views.logout_view, name='logout'),
+    path('client/', views.client_view, name='client'),
+    path('management/', views.management_view, name='management'),
+    
+    # API REST
+    path('api/products/', views.ProductList.as_view(), name='product-list'),
+    path('api/products/<int:pk>/', views.ProductDetail.as_view(), name='product-detail'),
+    path('api/orders/', views.OrderList.as_view(), name='order-list'),
+    path('api/orders/<int:pk>/', views.OrderDetail.as_view(), name='order-detail'),
+    path('api/contact/', views.ContactMessageList.as_view(), name='contact-list'),
+    path('api/contact/<int:pk>/', views.ContactMessageDetail.as_view(), name='contact-detail'),
 ]
