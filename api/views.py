@@ -158,3 +158,24 @@ def mes_messages(request):
     messages = ContactMessage.objects.filter(user=request.user)
     serializer = ContactMessageSerializer(messages, many=True)
     return Response(serializer.data)
+
+# Corriger la vue ProductViewSet pour gérer les uploads
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    
+    def perform_create(self, serializer):
+        # Gérer l'upload d'image
+        image = self.request.FILES.get('image')
+        if image:
+            serializer.save(image=image)
+        else:
+            serializer.save()
+    
+    def perform_update(self, serializer):
+        # Gérer l'upload d'image lors de la mise à jour
+        image = self.request.FILES.get('image')
+        if image:
+            serializer.save(image=image)
+        else:
+            serializer.save()

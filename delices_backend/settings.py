@@ -105,3 +105,7 @@ try:
 except ImportError:
     # Si boto3 n'est pas installé, utilise le stockage local
     pass
+
+# Configuration pour les fichiers uploadés
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
