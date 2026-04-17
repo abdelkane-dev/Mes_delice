@@ -73,11 +73,19 @@ TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
 USE_TZ = True
 
+# Configuration des fichiers statiques et médias
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'frontend']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuration CORS
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:8000,http://127.0.0.1:8000').split(',')
+
+# Configuration Whitenoise pour les médias
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_IGNORE_FILES = ['*.html']
