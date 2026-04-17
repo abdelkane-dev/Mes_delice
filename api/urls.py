@@ -18,6 +18,10 @@ urlpatterns = [
     path('api/contact/', views.ContactMessageViewSet.as_view({'get': 'list', 'post': 'create'}), name='contact-list'),
     path('api/contact/<int:pk>/', views.ContactMessageViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='contact-detail'),
     
+    # Endpoints supplémentaires
+    path('api/users/list/', views.users_list, name='users-list'),
+    path('api/contact/mes_messages/', views.mes_messages, name='mes-messages'),
+    
     # Notifications
     path('api/notifications/recent/', views.notifications_recent, name='notifications-recent'),
     path('api/notifications/unread_count/', views.notifications_unread_count, name='notifications-unread-count'),

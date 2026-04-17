@@ -139,3 +139,22 @@ def notifications_recent(request):
 def notifications_unread_count(request):
     """Compter les notifications non lues"""
     return Response({'count': 0})
+
+# Vues pour les utilisateurs
+@api_view(['GET'])
+def users_list(request):
+    """Lister les utilisateurs"""
+    if not request.user.is_staff:
+        return Response({'error': 'Accès non autorisé'}, status=403)
+    
+    from django.contrib.auth.models import User
+    users = User.objects.all().values('id', 'username', 'email', 'is_staff', 'is_active')
+    return Response(list(users))
+
+# Vues pour les messages de contact avec le bon nom d'endpoint
+@api_view(['GET'])
+def mes_messages(request):
+    """Récupérer les messages de l'utilisateur connecté"""
+    messages = ContactMessage.objects.filter(user=request.user)
+    serializer = ContactMessageSerializer(messages, many=True)
+    return Response(serializer.data)
