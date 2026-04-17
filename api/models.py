@@ -94,3 +94,51 @@ class ContactMessage(models.Model):
     
     def __str__(self):
         return f"Message de {self.name} - {self.subject}"
+
+class Notification(models.Model):
+    """Modèle pour les notifications utilisateurs"""
+
+    TYPE_CHOICES = [
+        ('nouvelle_commande', 'Nouvelle commande'),
+        ('commande_annulee', 'Commande annulée'),
+        ('commande_prete', 'Commande prête'),
+        ('commande_livree', 'Commande livrée'),
+        ('commande_statut', 'Statut de commande'),
+        ('reponse_message', 'Réponse à un message'),
+        ('nouveau_message', 'Nouveau message contact'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        verbose_name="Utilisateur"
+    )
+    type = models.CharField(
+        max_length=50,
+        choices=TYPE_CHOICES,
+        verbose_name="Type"
+    )
+    message = models.TextField(verbose_name="Message")
+    lien = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Lien"
+    )
+    est_lue = models.BooleanField(
+        default=False,
+        verbose_name="Est lue"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Créée le"
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Notification"
+        verbose_name_plural = "Notifications"
+
+    def __str__(self):
+        return f"Notification pour {self.user.username}: {self.message[:50]}"
