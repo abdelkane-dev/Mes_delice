@@ -179,3 +179,32 @@ class ProductViewSet(viewsets.ModelViewSet):
             serializer.save(image=image)
         else:
             serializer.save()
+
+# Mettre à jour ProductViewSet pour gérer les URLs
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    
+    def perform_create(self, serializer):
+        image_data = self.request.data.get('image')
+        
+        # Si c'est une URL, la sauvegarder directement
+        if image_data and image_data.startswith(('http://', 'https://')):
+            serializer.save(image=image_data)
+        # Si c'est un fichier uploadé
+        elif 'image' in self.request.FILES:
+            serializer.save(image=self.request.FILES['image'])
+        else:
+            serializer.save()
+    
+    def perform_update(self, serializer):
+        image_data = self.request.data.get('image')
+        
+        # Si c'est une URL, la sauvegarder directement
+        if image_data and image_data.startswith(('http://', 'https://')):
+            serializer.save(image=image_data)
+        # Si c'est un fichier uploadé
+        elif 'image' in self.request.FILES:
+            serializer.save(image=self.request.FILES['image'])
+        else:
+            serializer.save()

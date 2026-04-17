@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Product, Order, OrderItem, ContactMessage
 
 class ProductSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(max_length=None, use_url=True, required=False)
+    image = serializers.CharField(allow_blank=True, required=False, allow_null=True)
     
     class Meta:
         model = Product
